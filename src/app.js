@@ -1,10 +1,12 @@
 const express = require('express');
+
 const app = express();
 
 app.use(express.json());
 
-const veloexpressRouter = require('./routes/veloexpress.routes');
+// Rutas
+const serviciosRouter = require('./routes/servicios.routes');
 
-app.use('/api', veloexpressRouter);
+app.use('/api/servicios', serviciosRouter);
 
 module.exports = app;

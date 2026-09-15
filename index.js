@@ -1,7 +1,8 @@
 const app = require('./src/app');
+require('dotenv').config();
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-    console.log(`VELOEXPRESS funcionando en http://localhost:${PORT}`);
+    console.log(`🚗 VELOEXPRESS funcionando en http://localhost:${PORT}`);
 });
