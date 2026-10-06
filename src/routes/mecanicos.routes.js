@@ -3,15 +3,22 @@ const express = require('express');
 const {
     obtenerMecanicos,
     obtenerMecanicoPorId,
-    crearMecanico
+    crearMecanico,
+    actualizarMecanico,
+    eliminarMecanico
 } = require('../controllers/mecanicos.controller');
+
+const { verificarToken } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
+// Públicos
 router.get('/', obtenerMecanicos);
-
 router.get('/:id', obtenerMecanicoPorId);
 
-router.post('/', crearMecanico);
+// Privados
+router.post('/', verificarToken, crearMecanico);
+router.put('/:id', verificarToken, actualizarMecanico);
+router.delete('/:id', verificarToken, eliminarMecanico);
 
 module.exports = router;
