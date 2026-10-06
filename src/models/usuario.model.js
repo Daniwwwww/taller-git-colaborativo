@@ -9,6 +9,15 @@ const getAll = async () => {
     return rows;
 };
 
+// Buscar usuario por correo
+const getByCorreo = async (correo) => {
+    const [rows] = await pool.query(
+        'SELECT * FROM usuarios WHERE correo = ?',
+        [correo]
+    );
+
+    return rows[0];
+};
 
 // Obtener usuario por ID
 const getById = async (id) => {
@@ -48,5 +57,6 @@ const create = async ({
 module.exports = {
     getAll,
     getById,
+    getByCorreo,
     create
 };

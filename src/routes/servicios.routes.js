@@ -8,16 +8,17 @@ const {
     eliminarServicio
 } = require('../controllers/servicios.controller');
 
+const { verificarToken } = require('../middlewares/auth.middleware');
+
 const router = express.Router();
 
+// Rutas públicas
 router.get('/', obtenerServicios);
-
 router.get('/:id', obtenerServicioPorId);
 
-router.post('/', crearServicio);
-
-router.put('/:id', actualizarServicio);
-
-router.delete('/:id', eliminarServicio);
+// Rutas privadas
+router.post('/', verificarToken, crearServicio);
+router.put('/:id', verificarToken, actualizarServicio);
+router.delete('/:id', verificarToken, eliminarServicio);
 
 module.exports = router;
