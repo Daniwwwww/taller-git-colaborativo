@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken');
+const UsuarioModel = require('../models/usuario.model');
 
-const verificarToken = (req, res, next) => {
-    console.log(' PASÓ POR MIDDLEWARE');
-    const authHeader = req.headers['authorization'];
+const verificarToken = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
     const token = authHeader?.split(' ')[1];
 
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith('Bearer ') || !token) {
         return res.status(401).json({
             ok: false,
             msg: 'Token requerido'
@@ -18,13 +18,36 @@ const verificarToken = (req, res, next) => {
             process.env.JWT_SECRET
         );
 
-        req.usuario = decoded;
+        const usuario = await UsuarioModel.getById(decoded.id);
+
+        if (!usuario || !usuario.token || usuario.token !== token) {
+            return res.status(403).json({
+                ok: false,
+                msg: 'Token no autorizado'
+            });
+        }
+
+        req.usuario = {
+            id: usuario.id,
+            correo: usuario.correo
+        };
+
         next();
 
     } catch (error) {
-        return res.status(403).json({
+        if (error.name === 'JsonWebTokenError' ||
+            error.name === 'TokenExpiredError') {
+            return res.status(403).json({
+                ok: false,
+                msg: 'Token inválido o expirado'
+            });
+        }
+
+        console.error(error);
+
+        return res.status(500).json({
             ok: false,
-            msg: 'Token inválido o expirado'
+            msg: 'Error al verificar el token'
         });
     }
 };

@@ -1,38 +1,46 @@
 const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
 
 const app = express();
 
+// Middlewares globales
+app.use(cors());
+app.use(morgan('dev'));
 app.use(express.json());
 
-// Rutas
+// Rutas de autenticación
+const authRoutes = require('./routes/auth.routes');
 
-const authRouter = require('./routes/auth.routes');
+// Rutas de VELOEXPRESS
+const serviciosRoutes = require('./routes/servicios.routes');
+const usuariosRoutes = require('./routes/usuarios.routes');
+const mecanicosRoutes = require('./routes/mecanicos.routes');
+const lavaderosRoutes = require('./routes/lavaderos.routes');
+const gruasRoutes = require('./routes/gruas.routes');
+const montallantasRoutes = require('./routes/montallantas.routes');
 
-const serviciosRouter = require('./routes/servicios.routes');
+// Registrar rutas
+app.use('/api/auth', authRoutes);
+app.use('/api/servicios', serviciosRoutes);
+app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/mecanicos', mecanicosRoutes);
+app.use('/api/lavaderos', lavaderosRoutes);
+app.use('/api/gruas', gruasRoutes);
+app.use('/api/montallantas', montallantasRoutes);
 
-const usuariosRouter = require('./routes/usuarios.routes');
+// Middleware global de errores
+app.use((err, req, res, next) => {
+    console.error(err);
 
-const mecanicosRouter = require('./routes/mecanicos.routes');
+    if (res.headersSent) {
+        return next(err);
+    }
 
-const lavaderosRouter = require('./routes/lavaderos.routes');
-
-const gruasRouter = require('./routes/gruas.routes');
-
-const montallantasRouter = require('./routes/montallantas.routes');
-
-app.use('/api/auth', authRouter);
-
-app.use('/api/servicios', serviciosRouter);
-
-app.use('/api/usuarios', usuariosRouter);
-
-app.use('/api/mecanicos', mecanicosRouter);
-
-app.use('/api/lavaderos', lavaderosRouter);
-
-app.use('/api/gruas', gruasRouter);
-
-app.use('/api/montallantas', montallantasRouter);
-
+    res.status(500).json({
+        ok: false,
+        msg: 'Error interno del servidor'
+    });
+});
 
 module.exports = app;

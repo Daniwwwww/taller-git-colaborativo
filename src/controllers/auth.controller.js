@@ -6,7 +6,7 @@ const UsuarioModel = require('../models/usuario.model');
 // REGISTRAR USUARIO
 const register = async (req, res) => {
     try {
-        const { nombre, correo, telefono, password } = req.body;
+        const { nombre, correo, password } = req.body;
 
         if (!nombre || !correo || !password) {
             return res.status(400).json({
@@ -24,48 +24,45 @@ const register = async (req, res) => {
             });
         }
 
-        // Encriptar contraseña
         const passwordHash = await bcrypt.hash(password, 10);
 
         const usuario = await UsuarioModel.create({
             nombre,
             correo,
-            telefono,
             password: passwordHash
         });
 
-        const token = jwt.sign(
-            {
-                id: usuario.id,
-                correo: usuario.correo
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: process.env.JWT_EXPIRES_IN
-            }
-        );
-
-        res.status(201).json({
+        return res.status(201).json({
             ok: true,
             msg: 'Usuario registrado correctamente',
-            token
+            usuario: {
+                id: usuario.id,
+                nombre: usuario.nombre,
+                correo: usuario.correo
+            }
         });
 
     } catch (error) {
         console.error(error);
 
-        res.status(500).json({
+        return res.status(500).json({
             ok: false,
             msg: 'Error al registrar usuario'
         });
     }
 };
 
-
 // INICIAR SESIÓN
 const login = async (req, res) => {
     try {
         const { correo, password } = req.body;
+
+        if (!correo || !password) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Correo y password son obligatorios'
+            });
+        }
 
         const usuario = await UsuarioModel.getByCorreo(correo);
 
@@ -95,11 +92,14 @@ const login = async (req, res) => {
             },
             process.env.JWT_SECRET,
             {
-                expiresIn: process.env.JWT_EXPIRES_IN
+                expiresIn: process.env.JWT_EXPIRES_IN || '7d'
             }
         );
 
-        res.json({
+        // Guardar el token en la base de datos
+        await UsuarioModel.updateToken(usuario.id, token);
+
+        return res.status(200).json({
             ok: true,
             msg: 'Login exitoso',
             token
@@ -108,13 +108,12 @@ const login = async (req, res) => {
     } catch (error) {
         console.error(error);
 
-        res.status(500).json({
+        return res.status(500).json({
             ok: false,
             msg: 'Error al iniciar sesión'
         });
     }
 };
-
 
 module.exports = {
     register,

@@ -29,7 +29,6 @@ const getById = async (id) => {
     return rows[0];
 };
 
-
 // Crear usuario
 const create = async ({
     nombre,
@@ -37,7 +36,6 @@ const create = async ({
     telefono,
     password
 }) => {
-
     const [result] = await pool.query(
         `INSERT INTO usuarios
         (nombre, correo, telefono, password)
@@ -46,17 +44,25 @@ const create = async ({
             nombre,
             correo,
             telefono ?? null,
-            password ?? null
+            password
         ]
     );
 
     return getById(result.insertId);
 };
 
+// Guardar o actualizar el token del usuario
+const updateToken = async (id, token) => {
+    await pool.query(
+        'UPDATE usuarios SET token = ? WHERE id = ?',
+        [token, id]
+    );
+};
 
 module.exports = {
     getAll,
     getById,
     getByCorreo,
-    create
+    create,
+    updateToken
 };
