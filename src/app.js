@@ -5,7 +5,10 @@ const morgan = require('morgan');
 const app = express();
 
 // Middlewares globales
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://localhost:5173'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 
